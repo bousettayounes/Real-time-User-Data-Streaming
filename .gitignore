@@ -1,0 +1,4 @@
+myvenv/
+logs/
+cassandra_data/
+__pycache__/

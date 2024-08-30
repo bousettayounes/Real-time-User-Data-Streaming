@@ -1,0 +1,3 @@
+FROM bitnami/spark:3.4.1
+
+RUN pip install --no-cache-dir confluent-kafka pyspark[avro] avro-python3 fastavro
