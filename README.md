@@ -9,6 +9,7 @@ In this project, I have used the following technologies:
 - APACHE KAFKA with schema registry & Control Center
 - APACHE CASSANDRA
 - APACHE SPARK CLUSTER
+- POSTGRESQL
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
 
