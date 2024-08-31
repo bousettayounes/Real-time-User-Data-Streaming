@@ -3,6 +3,13 @@ from airflow.decorators import dag, task
 from confluent_kafka.avro import AvroProducer
 from confluent_kafka import avro
 import airflow
+from airflow.models import Variable 
+
+# get variables from Airflow
+BROKER = Variable.get("Broker")
+KAFKA_PORT = Variable.get("Kafka_Port")
+SCHEMA_URL = Variable.get("Schema_URL")
+TOPIC_NAME = Variable.get("topic_name")
 
 # DAG default arguments
 def_args = {
@@ -59,14 +66,14 @@ def streaming_data_dag():
     # Task to stream data to Kafka using Avro serialization
     @task
     def stream_data(data):
-        schema_registry_url = "http://schema-registry:8081"  # URL of your Schema Registry
-        schema_subject = "API_Data-value"  # Schema subject in the Schema Registry
+        schema_registry_url = SCHEMA_URL  # URL of your Schema Registry
+        schema_subject = f"{TOPIC_NAME}-value"  # Schema subject in the Schema Registry
         
         # Get schema from Schema Registry
         value_schema = get_schema(schema_registry_url, schema_subject)
         
         producer_config = {
-            'bootstrap.servers': 'kafka:9093',
+            'bootstrap.servers': f"{BROKER}:{KAFKA_PORT}",
             'schema.registry.url': schema_registry_url
         }
         
@@ -74,7 +81,7 @@ def streaming_data_dag():
         
         current_time = time.time()
         while time.time() <= current_time + 50:
-            producer.produce(topic="API_Data", value=data)
+            producer.produce(topic=TOPIC_NAME, value=data)
             producer.flush()
             logging.info("Data sent successfully with Avro serialization")
             time.sleep(1)

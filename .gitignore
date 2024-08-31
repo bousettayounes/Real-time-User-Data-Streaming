@@ -1,4 +1,5 @@
 myvenv/
 logs/
 cassandra_data/
+pg_data/
 __pycache__/

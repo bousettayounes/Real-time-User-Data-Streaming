@@ -8,8 +8,18 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 from typing import Dict, List
 import threading
+from airflow.models import Variable  # Import Airflow Variable
 
 logging.basicConfig(level=logging.INFO)
+
+# Get variables from Airflow
+BROKER = Variable.get("Broker")
+DATABASE_SERVER = Variable.get("Database_Server")
+DATABASE_PORT = Variable.get("DataBase_Port")
+KAFKA_PORT = Variable.get("Kafka_Port")
+SCHEMA_URL = Variable.get("Schema_URL")
+TOPIC_NAME = Variable.get("topic_name")
+GROUP_ID = Variable.get("group_id")  
 
 def create_keyspace(session):
     session.execute("""
@@ -41,8 +51,8 @@ def create_spark_connection():
     try:
         s_conn = SparkSession.builder \
             .appName('Spark_Data_Streaming') \
-            .config("spark.cassandra.connection.host", "cassandra") \
-            .config("spark.cassandra.connection.port", "9042") \
+            .config("spark.cassandra.connection.host", DATABASE_SERVER) \
+            .config("spark.cassandra.connection.port", DATABASE_PORT) \
             .getOrCreate()
         s_conn.sparkContext.setLogLevel("ERROR")
         logging.info("Spark connection created successfully!")
@@ -53,7 +63,7 @@ def create_spark_connection():
 def create_cassandra_connection():
     try:
         cluster = Cluster(
-            contact_points=['cassandra'],
+            contact_points=[DATABASE_SERVER],
             load_balancing_policy=DCAwareRoundRobinPolicy(local_dc='datacenter1'),
             protocol_version=5
         )
@@ -64,10 +74,9 @@ def create_cassandra_connection():
         return None
 
 def get_avro_deserializer():
-    schema_registry_url = "http://schema-registry:8081"
-    schema_registry_client = SchemaRegistryClient({'url': schema_registry_url})
+    schema_registry_client = SchemaRegistryClient({'url': SCHEMA_URL})
     try:
-        schema = schema_registry_client.get_latest_version("API_Data-value").schema
+        schema = schema_registry_client.get_latest_version(f"{TOPIC_NAME}-value").schema
         return AvroDeserializer(schema_registry_client, schema.schema_str)
     except Exception as e:
         logging.error(f"Error retrieving Avro schema: {e}")
@@ -113,7 +122,7 @@ def kafka_to_spark_stream(spark, kafka_data: List[Dict]):
         StructField("phone", StringType(), True),
         StructField("picture", StringType(), True)
     ])
-    spark_df=spark.createDataFrame(kafka_data, schema)
+    spark_df = spark.createDataFrame(kafka_data, schema)
     return spark_df
 
 def process_data(spark, kafka_data):
@@ -128,7 +137,7 @@ def process_data(spark, kafka_data):
      .save())
 
 def run_kafka_consumer(avro_deserializer, kafka_data):
-    for message in kafka_consumer("API_Data", "user_data_group", "kafka:9093", avro_deserializer):
+    for message in kafka_consumer(TOPIC_NAME, GROUP_ID, f"{BROKER}:{KAFKA_PORT}", avro_deserializer):
         kafka_data.append(message)
 
 if __name__ == "__main__":

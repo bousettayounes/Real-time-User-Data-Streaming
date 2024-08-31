@@ -162,6 +162,8 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
     networks:
       - YNS_NETWORK
 
@@ -172,6 +174,7 @@ services:
       - "8080:8080"
     depends_on:
       - scheduler
+      - postgres
 
   scheduler:
     <<: *airflow-common
