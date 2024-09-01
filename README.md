@@ -5,10 +5,10 @@ Developing a data pipeline to stream user data from a user generator API, apply 
 In this project, I have used the following technologies:
 
 - DOCKER
-- APACHE AIRFLOW
+- APACHE AIRFLOW 
 - APACHE KAFKA with schema registry & Control Center
-- APACHE CASSANDRA
-- APACHE SPARK CLUSTER
+- APACHE CASSANDRA 
+- APACHE SPARK CLUSTER [PYSPARK]
 - POSTGRESQL
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
