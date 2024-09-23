@@ -13,7 +13,7 @@ In this project, I have used the following technologies:
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
 
-![Project Architecture](https://github.com/user-attachments/assets/5f8a7a47-c4d0-49b7-8999-6dc9b6b59aae)
+![Project Architecture](https://github.com/user-attachments/assets/9f1ab06f-515a-4259-9a5a-914cf2393059)
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
 
